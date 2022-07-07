@@ -129,3 +129,20 @@ def edit_book(request, id):
     except Exception as err:
         print(err)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def many_books(request):
+    try:
+        for element in request.data:
+            print(element)
+            author = Author.objects.get(id=element['author'])
+            book = Book(
+                title=element['title'],
+                description=element['description'],
+                author=author
+            )
+            book.save()
+        return Response({"status": "created"}, status=status.HTTP_200_OK)
+    except Exception as err:
+        print(err)
+        return Response({}, status=status.HTTP_404_NOT_FOUND)
