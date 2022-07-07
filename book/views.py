@@ -6,7 +6,6 @@ from .serializers import AuthorSerializer, BookSerializer
 from rest_framework import status
 
 
-
 # Create your views here.
 @api_view(['GET'])
 def authors_list(request):
@@ -107,7 +106,8 @@ def delete_book(request, id):
         book = Book.objects.get(id=id)
         if book:
             book.delete()
-            return Response({}, status=status.HTTP_202_ACCEPTED)
+            serializer = BookSerializer(book)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
     except Exception as err:
         print(err)
@@ -133,8 +133,8 @@ def edit_book(request, id):
 @api_view(['POST'])
 def many_books(request):
     try:
+        books = []
         for element in request.data:
-            print(element)
             author = Author.objects.get(id=element['author'])
             book = Book(
                 title=element['title'],
@@ -142,7 +142,9 @@ def many_books(request):
                 author=author
             )
             book.save()
-        return Response({"status": "created"}, status=status.HTTP_200_OK)
+            books.append(book)
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as err:
         print(err)
         return Response({}, status=status.HTTP_404_NOT_FOUND)
